@@ -1,0 +1,66 @@
+version: '3.8'
+services:
+  skyreserve-app:
+    build: ./skyreserve
+    container_name: skyreserve-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/skyreserve_db
+      - SPRING_DATA_REDIS_HOST=redis-cache
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      - postgres-db
+      - redis-cache
+      - kafka
+
+  notification-app:
+    build: ./skyreserve-notification
+    container_name: notification-app
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      - kafka
+
+  # 1. Kalıcı Hafızamız (Veritabanı)
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: skyreserve-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: skyreserve_db
+    ports:
+      - "5434:5432"
+
+  # 2. Işık Hızındaki Önbelleğimiz
+  redis-cache:
+    image: redis:alpine
+    container_name: skyreserve-redis
+    ports:
+      - "6379:6379"
+
+  # 3. Kafka Yöneticisi
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.4
+    container_name: skyreserve-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  # 4. Mesajlaşma Postanemiz
+  kafka:
+    image: confluentinc/cp-kafka:7.4.4
+    container_name: skyreserve-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # ... postgres-db, redis-cache, zookeeper ve kafka servislerin buraya gelecek (eskisi gibi)
