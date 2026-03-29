@@ -24,11 +24,11 @@ class SkyreserveApplicationTests {
 
     @Test
     void testConcurrencyBooking() throws InterruptedException {
-        int userCount = 100; // 100 kişi saldırıyor!
+        int userCount = 100;
         ExecutorService executorService = Executors.newFixedThreadPool(userCount);
-        CountDownLatch latch = new CountDownLatch(1); // Herkesin aynı anda başlaması için işaret fişeği
+        CountDownLatch latch = new CountDownLatch(1);
 
-        AtomicInteger successCount = new AtomicInteger(); // çoklu işçilerin (threads) güvenle sayı artırabildiği özel bir sınıftır.
+        AtomicInteger successCount = new AtomicInteger();
         AtomicInteger failCount = new AtomicInteger();
 
         for(int i=0; i < userCount; i++){
@@ -37,15 +37,15 @@ class SkyreserveApplicationTests {
                 try{
                     latch.await();
                     bookingService.bookFlight(createRequest(passengerName));
-                    successCount.incrementAndGet(); // bilet alma başarılı olursa başarı sayacını 1 artır.
+                    successCount.incrementAndGet();
                 } catch (Exception e){
                     failCount.incrementAndGet();
                 }
             });
         }
 
-        latch.countDown(); // İşaret fişeği patladı! Herkes aynı anda saldırıyor!
-        Thread.sleep(5000); // Testin bitmesini bekle
+        latch.countDown();
+        Thread.sleep(5000);
 
         System.out.println("=====================");
         System.out.println("TEST RESULT: ");

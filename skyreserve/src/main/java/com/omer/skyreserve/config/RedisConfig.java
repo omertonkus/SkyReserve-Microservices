@@ -10,7 +10,6 @@ import tools.jackson.databind.ObjectMapper; // Senin kullandığın Jackson 3
 @Configuration
 public class RedisConfig {
 
-    // ObjectMapper'ı bir fasulye (Bean) yapalım ki her yerden enjekte edebilelim
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();

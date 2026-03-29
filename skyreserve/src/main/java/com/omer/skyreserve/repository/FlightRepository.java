@@ -10,8 +10,8 @@ import java.util.Optional;
 
 public interface FlightRepository extends JpaRepository<Flight, Long> {
 
-    // Bu metod çağrıldığında veritabanındaki ilgili satır kilitlenir.
-    // İşlem bitene kadar başka hiç kimse bu satırı güncelleyemez!
+    // When this method is called, the corresponding row in the database is locked.
+    // This row cannot be updated until the operation is complete!
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT f FROM Flight f WHERE f.id = :id")
     Optional<Flight> findByIdWithLock(Long id);

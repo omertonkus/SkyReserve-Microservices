@@ -27,25 +27,24 @@ public class BookingService {
     @Transactional // rollback
     public String bookFlight(BookingRequest request){
 
-        // Veritabanındaki satırı KİLİTLE (Pessimistic Lock)
+        // LOCK the row in the database. (Pessimistic Lock)
         Flight flight = flightRepository.findByIdWithLock(request.getFlightId())
                 .orElseThrow(()-> new BaseException("Flight Not Found! ID: "+ request.getFlightId()));
 
-        // Koltuk kontrolü
+        // Seat control
         if(flight.getAvailableSeats() <= 0){
             throw new BaseException("Sorry, flight number " + flight.getFlightNumber() + " is fully booked!");
         }
 
-        // Koltuk sayısını azalt ve kaydet
         flight.setAvailableSeats(flight.getAvailableSeats() - 1);
         flightRepository.save(flight);
 
-        // Bilet satıldıktan hemen sonra Redis'teki eski bilgiyi sil (Cache Eviction)
+        // Redis deletes the old information immediately after the ticket is sold. (Cache Eviction)
         String redisKey = "flight:" + request.getFlightId();
         redisTemplate.delete(redisKey);
-        log.info(">>> REDIS TEMİZLENDİ: Güncel veri bir sonraki sorguda DB'den gelecek.");
+        log.info(">>> REDIS CLEANED: The latest data will be retrieved from the database in the next query.");
 
-        // Kafka'ya anons geç (Asenkron bildirim)
+        // Announce the news to Kafka (Asynchronous notification)
         String message = String.format("TICKET SOLD: Passenger %s purchased a ticket for flight %s.",
                 request.getPassengerName(), flight.getFlightNumber());
         kafkaTemplate.send("booking-events", message);

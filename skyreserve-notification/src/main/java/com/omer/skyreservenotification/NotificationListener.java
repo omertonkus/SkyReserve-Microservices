@@ -5,10 +5,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Service
-@Slf4j // Log yazmak için pratik Lombok anotasyonu
+@Slf4j
 public class NotificationListener {
 
-    // SkyReserve projesinde gönderdiğimiz topic adıyla aynı olmalı: "booking-events"
     @KafkaListener(topics = "booking-events", groupId = "notification-group")
     public void listenBookingEvents(String message){
         log.info("--------------------------");

@@ -22,10 +22,10 @@ public class SkyreserveApplication {
                 flight.setFlightNumber("TK2026");
                 flight.setDeparture("Istanbul");
                 flight.setDestination("London");
-                flight.setAvailableSeats(5); // Test için az koltuk koyalım
+                flight.setAvailableSeats(5);
                 flight.setPrice(new java.math.BigDecimal("2500.00"));
                 flightRepository.save(flight);
-                System.out.println(">>> SkyReserve: Test uçuşu oluşturuldu (ID: 1)");
+                System.out.println(">>> SkyReserve: Test flight created (ID: 1)");
 
             }
         };
